@@ -1,0 +1,137 @@
+# Patch for TinyXML 2.6.2 to enable STL and build shared library
+# Copyright (C) 2015 Georgi D. Sotirov <gdsotirov@dir.bg>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+diff -urNad tinyxml-2.6.2-orig/Makefile tinyxml-2.6.2/Makefile
+--- tinyxml-2.6.2-orig/Makefile	2011-05-15 05:24:57.000000000 +0300
++++ tinyxml-2.6.2/Makefile	2015-04-25 12:42:19.000000000 +0300
+@@ -15,7 +15,7 @@
+ 
+ # TINYXML_USE_STL can be used to turn on STL support. NO, then STL
+ # will not be used. YES will include the STL files.
+-TINYXML_USE_STL := NO
++TINYXML_USE_STL := YES
+ 
+ #****************************************************************************
+ 
+@@ -28,7 +28,11 @@
+ DEBUG_CFLAGS     := -Wall -Wno-format -g -DDEBUG
+ RELEASE_CFLAGS   := -Wall -Wno-unknown-pragmas -Wno-format -O3
+ 
+-LIBS		 :=
++LIBS		 := tinyxml
++VER_MAJ          := 2
++VER_MIN          := 6
++VER_PATCH        := 2
++VERSION          := ${VER_MAJ}.${VER_MIN}.${VER_PATCH}
+ 
+ DEBUG_CXXFLAGS   := ${DEBUG_CFLAGS} 
+ RELEASE_CXXFLAGS := ${RELEASE_CFLAGS}
+@@ -74,8 +78,8 @@
+ # Makefile code common to all platforms
+ #****************************************************************************
+ 
+-CFLAGS   := ${CFLAGS}   ${DEFS}
+-CXXFLAGS := ${CXXFLAGS} ${DEFS}
++CFLAGS   := ${CFLAGS}   ${DEFS} ${EXT_CFLAGS}
++CXXFLAGS := ${CXXFLAGS} ${DEFS} ${EXT_CXXFLAGS}
+ 
+ #****************************************************************************
+ # Targets of the build
+@@ -83,26 +87,38 @@
+ 
+ OUTPUT := xmltest
+ 
+-all: ${OUTPUT}
++#****************************************************************************
++# Installation
++#****************************************************************************
++
++DESTDIR=${DESTDIR:-/usr/local}
++LIBDIR=${LIBDIR:-lib}
++
++all: ${OUTPUT} lib${LIBS}.so
+ 
+ 
+ #****************************************************************************
+ # Source files
+ #****************************************************************************
+ 
+-SRCS := tinyxml.cpp tinyxmlparser.cpp xmltest.cpp tinyxmlerror.cpp tinystr.cpp
++LIB_SRCS := tinyxml.cpp tinyxmlparser.cpp tinyxmlerror.cpp tinystr.cpp
++TST_SRCS := xmltest.cpp
+ 
+ # Add on the sources for libraries
+-SRCS := ${SRCS}
++LIB_SRCS := ${LIB_SRCS}
+ 
+-OBJS := $(addsuffix .o,$(basename ${SRCS}))
++LIB_OBJS := $(addsuffix .o,$(basename ${LIB_SRCS}))
++TST_OBJS := $(addsuffix .o,$(basename ${TST_SRCS}))
+ 
+ #****************************************************************************
+ # Output
+ #****************************************************************************
+ 
+-${OUTPUT}: ${OBJS}
+-	${LD} -o $@ ${LDFLAGS} ${OBJS} ${LIBS} ${EXTRA_LIBS}
++${OUTPUT}: ${TST_OBJS} lib${LIBS}.so
++	${LD} -o $@ ${LDFLAGS} $< -L. -l${LIBS} ${EXTRA_LIBS}
++
++lib${LIBS}.so: ${LIB_OBJS}
++	${LD} -shared -o $@ -Wl,-soname,$@ ${LIB_OBJS}
+ 
+ #****************************************************************************
+ # common rules
+@@ -110,21 +126,35 @@
+ 
+ # Rules for compiling source files to object files
+ %.o : %.cpp
+-	${CXX} -c ${CXXFLAGS} ${INCS} $< -o $@
++	${CXX} -fPIC -c ${CXXFLAGS} ${INCS} $< -o $@
+ 
+ %.o : %.c
+-	${CC} -c ${CFLAGS} ${INCS} $< -o $@
++	${CC} -fPIC -c ${CFLAGS} ${INCS} $< -o $@
+ 
+ dist:
+ 	bash makedistlinux
+ 
+ clean:
+-	-rm -f core ${OBJS} ${OUTPUT}
++	rm -f core ${LIB_OBJS} ${TST_OBJS} ${OUTPUT} lib${LIBS}.so
++	rm -f demotest.xml test5.xml test6.xml test7.xml textfile.txt utf8testout.xml
+ 
+ depend:
+ 	#makedepend ${INCS} ${SRCS}
+ 
++install:
++	mkdir -p ${DESTDIR}/{include,lib${LIBDIR}}
++	install -m 0644 tinyxml.h ${DESTDIR}/include
++	install -m 0644 tinystr.h ${DESTDIR}/include
++	install -m 755 lib${LIBS}.so ${DESTDIR}/lib${LIBDIR}/lib${LIBS}.so.${VER_MAJ}.${VER_MIN}.${VER_PATCH}
++	cd ${DESTDIR}/lib${LIBDIR}; ln -s lib${LIBS}.so.${VER_MAJ}.${VER_MIN}.${VER_PATCH} lib${LIBS}.so.${VER_MAJ}.${VER_MIN}
++	cd ${DESTDIR}/lib${LIBDIR}; ln -s lib${LIBS}.so.${VER_MAJ}.${VER_MIN}.${VER_PATCH} lib${LIBS}.so.${VER_MAJ}
++	cd ${DESTDIR}/lib${LIBDIR}; ln -s lib${LIBS}.so.${VER_MAJ}.${VER_MIN}.${VER_PATCH} lib${LIBS}.so
++
++test:
++	LD_LIBRARY_PATH=. ./${OUTPUT} || /bin/false
++
+ tinyxml.o: tinyxml.h tinystr.h
+ tinyxmlparser.o: tinyxml.h tinystr.h
+ xmltest.o: tinyxml.h tinystr.h
+ tinyxmlerror.o: tinyxml.h tinystr.h
++
