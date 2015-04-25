@@ -119,13 +119,13 @@ diff -urNad tinyxml-2.6.2-orig/Makefile tinyxml-2.6.2/Makefile
  	#makedepend ${INCS} ${SRCS}
  
 +install:
-+	mkdir -p ${DESTDIR}/{include,lib${LIBDIR}}
++	mkdir -p ${DESTDIR}/{include,${LIBDIR}}
 +	install -m 0644 tinyxml.h ${DESTDIR}/include
 +	install -m 0644 tinystr.h ${DESTDIR}/include
-+	install -m 755 lib${LIBS}.so ${DESTDIR}/lib${LIBDIR}/lib${LIBS}.so.${VER_MAJ}.${VER_MIN}.${VER_PATCH}
-+	cd ${DESTDIR}/lib${LIBDIR}; ln -s lib${LIBS}.so.${VER_MAJ}.${VER_MIN}.${VER_PATCH} lib${LIBS}.so.${VER_MAJ}.${VER_MIN}
-+	cd ${DESTDIR}/lib${LIBDIR}; ln -s lib${LIBS}.so.${VER_MAJ}.${VER_MIN}.${VER_PATCH} lib${LIBS}.so.${VER_MAJ}
-+	cd ${DESTDIR}/lib${LIBDIR}; ln -s lib${LIBS}.so.${VER_MAJ}.${VER_MIN}.${VER_PATCH} lib${LIBS}.so
++	install -m 755 lib${LIBS}.so ${DESTDIR}/${LIBDIR}/lib${LIBS}.so.${VER_MAJ}.${VER_MIN}.${VER_PATCH}
++	cd ${DESTDIR}/${LIBDIR}; ln -s lib${LIBS}.so.${VER_MAJ}.${VER_MIN}.${VER_PATCH} lib${LIBS}.so.${VER_MAJ}.${VER_MIN}
++	cd ${DESTDIR}/${LIBDIR}; ln -s lib${LIBS}.so.${VER_MAJ}.${VER_MIN}.${VER_PATCH} lib${LIBS}.so.${VER_MAJ}
++	cd ${DESTDIR}/${LIBDIR}; ln -s lib${LIBS}.so.${VER_MAJ}.${VER_MIN}.${VER_PATCH} lib${LIBS}.so
 +
 +test:
 +	LD_LIBRARY_PATH=. ./${OUTPUT} || /bin/false
