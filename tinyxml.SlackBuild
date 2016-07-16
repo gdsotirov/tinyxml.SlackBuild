@@ -19,7 +19,7 @@
 #
 # Visit SlackPack at http://sotirov-bg.net/slackpack/
 # 
-# $Id: tinyxml.SlackBuild,v 1.4 2016/07/16 09:11:03 gsotirov Exp $
+# $Id: tinyxml.SlackBuild,v 1.5 2016/07/16 10:19:15 gsotirov Exp $
 #
 
 . ../../slack-package.conf
@@ -63,6 +63,7 @@ patch -b -z .orig -p1 < $CWD/$NAME-${VERSION}.diff || exit 2
 # Build & install
 EXT_CFLAGS=$SLKCFLAGS \
 EXT_CXXFLAGS=$SLKCFLAGS \
+TINYXML_USE_STL=YES \
 make -j4 all || exit 3 
 make test || exit 4
 make DESTDIR=$PKG/usr LIBDIR=lib${LIBDIRSUFFIX} install || exit 5
