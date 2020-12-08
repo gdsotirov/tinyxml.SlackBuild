@@ -1,5 +1,5 @@
 # Patch for TinyXML 2.6.2 to enable STL and build shared library
-# Copyright (C) 2015 Georgi D. Sotirov <gdsotirov@dir.bg>
+# Copyright (C) 2015 Georgi D. Sotirov <gdsotirov@gmail.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+# Visit SlackPack at https://sotirov-bg.net/slackpack/
 #
 diff -urNad tinyxml-2.6.2-orig/Makefile tinyxml-2.6.2/Makefile
 --- tinyxml-2.6.2-orig/Makefile	2011-05-15 05:24:57.000000000 +0300
